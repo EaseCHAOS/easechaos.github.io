@@ -2,7 +2,7 @@ import os
 
 from fastapi import APIRouter
 from pydantic import BaseModel
-from extract.extract_table import get_time_table, _get_all_daily_tables
+from extract.extract_table import get_time_table
 import json
 from pathlib import Path
 
@@ -11,7 +11,7 @@ from api.config.redis_config import get_table_from_cache, add_table_to_cache
 
 # Find the path of the drafts
 current_script_path = Path(__file__)
-project_root_path = current_script_path.parent
+project_root_path = current_script_path.parents[1]
 DRAFTS_FOLDER = project_root_path / "drafts"
 
 router = APIRouter()

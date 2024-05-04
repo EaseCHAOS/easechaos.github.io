@@ -19,7 +19,7 @@ def create_cache_key_from_parameters(filename: str, class_pattern: str) -> str:
 
 
 
-def get_table_from_cache(class_pattern: str, filename: str) -> str | None:
+def get_table_from_cache(filename: str, class_pattern: str) -> str | None:
     """
     Get a table from the cache.
 
@@ -28,7 +28,7 @@ def get_table_from_cache(class_pattern: str, filename: str) -> str | None:
     class_pattern : str
         The pattern for the class.
     filename : str
-        The name of the file for the timetable.
+        The name of the file for the timetable
 
     Returns
     -------
@@ -38,7 +38,7 @@ def get_table_from_cache(class_pattern: str, filename: str) -> str | None:
 
     return r.get(create_cache_key_from_parameters(filename, class_pattern))
 
-def add_table_to_cache(table: str, class_pattern: str, filename: str):
+def add_table_to_cache(table: str, filename: str, class_pattern: str):
     """
     Add a table to the cache.
 

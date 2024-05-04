@@ -74,6 +74,8 @@ def _get_all_daily_tables(filename: str, class_pattern: str) -> dict:
     dict
         A dictionary of the daily tables for each class.
     """
+    filename +='.xlsx'
+
     workbook = openpyxl.load_workbook(filename)
     dfs = {}
     for sheet in workbook.sheetnames:

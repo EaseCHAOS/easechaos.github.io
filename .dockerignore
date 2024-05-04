@@ -166,7 +166,6 @@ cython_debug/
 .idea/
 
 existing_drafts/
-frontend/
 main.py
 README.md
 myenv/
