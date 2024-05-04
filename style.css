@@ -31,12 +31,22 @@ nav li {
     margin-right: 10px;
 }
 
-a:hover {
-    color: var(--links-hover);
-}
-
 a {
     text-decoration: none;
+    display: inline-flex;
+}
+
+a p {
+    margin-left: 5px;
+}
+
+a img {
+    width: 20px;
+    height: 20px;
+}
+
+a p:hover {
+    color: var(--links-hover);
 }
 
 header {
@@ -58,18 +68,22 @@ header {
     font-size: 60px;
     font-weight: bold;
     margin-right: 10px;
-    background: none;
 }
 
 #header-title img {
     width: 80px;
     height: 100px;
     margin-left: 10px;
-    background: none;
+    background-color: transparent;
 }
 
 #header-text {
     font-size: 20px;
+}
+
+#header-title h1,
+#header-text p {
+    background: none;
 }
 
 footer {
