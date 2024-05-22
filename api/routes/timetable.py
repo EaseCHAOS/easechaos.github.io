@@ -13,8 +13,6 @@ from io import BytesIO
 from api.config.redis_config import (
     get_table_from_cache,
     add_table_to_cache,
-    add_file_to_cache,
-    get_file_from_cache,
 )
 
 
@@ -38,11 +36,9 @@ class TimeTableRequest(BaseModel):
     filename: str
     class_pattern: str
 
-
-@router.post("/get_time_table")
-async def get_time_table_endpoint(request: TimeTableRequest):
+def get_json_table(request: TimeTableRequest):
     """
-    A function to handle the POST request for getting the time table.
+    A function to get the time table in JSON format.
 
     Parameters:
     - request: TimeTableRequest - the request object containing the filename and class pattern
@@ -63,6 +59,45 @@ async def get_time_table_endpoint(request: TimeTableRequest):
         )
 
     return json.loads(table)
+
+@router.post("/get_time_table")
+async def get_time_table(request: TimeTableRequest):
+    """
+    Endpoint for generating a parsed json time table
+
+    Args:
+        request (TimeTableRequest): The request object containing the filename and class pattern.
+
+    Returns:
+        JSON: Parsed data from the get_json_table function that contains the time table cutting across days and time slots. 
+        It covers merged durations of lectures exceeding one hour as well.
+    """    
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+
+    json_data = get_json_table(request)
+
+    table_data = []
+    for index, day in enumerate(json_data):
+        day_data = []
+        current_slot = None
+        for key, value in day.items():
+            time_parts = key.split("-")
+            if len(time_parts) == 2:
+                start, end = time_parts
+            else:
+                start = "-".join(time_parts[:-1])
+                end = time_parts[-1]
+            if current_slot and current_slot["value"] == value and current_slot["end"] == start:
+                current_slot["end"] = end
+            else:
+                if current_slot:
+                    day_data.append(current_slot)
+                current_slot = {"start": start, "end": end, "value": value}
+        if current_slot:
+            day_data.append(current_slot)
+        table_data.append({"day": days[index], "data": day_data})
+
+    return table_data
 
 
 @router.post("/download")
@@ -91,11 +126,6 @@ async def download_time_table_endpoint(request: TimeTableRequest):
         - class_pattern (str): The pattern for the class.
     - The `get_table_from_cache` and `add_table_to_cache` functions should be implemented elsewhere in the codebase.
 
-    Example usage:
-    ```
-    @router.post("/download")
-    async def download_time_table_endpoint(request: TimeTableRequest):
-        # Function body
     ```
     """
     filename = os.path.join(DRAFTS_FOLDER, request.filename)
