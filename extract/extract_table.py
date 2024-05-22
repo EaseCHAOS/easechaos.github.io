@@ -28,7 +28,8 @@ def _get_daily_table(df: pd.DataFrame, class_pattern: str) -> pd.DataFrame:
     Get the a simplified dataframe of the classes for a given class.
 
     Parameters
-    ----------
+    ----------    table = catched_get_table(raw_file, class_to_extract_for)
+
     df : pandas.DataFrame
         The dataframe to get the simplified time table from.
         It's a general time table on a single day for all classes.
