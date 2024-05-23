@@ -63,7 +63,7 @@ def get_json_table(request: TimeTableRequest):
 
 
 @router.post("/get_time_table")
-async def get_time_table(request: TimeTableRequest):
+async def get_time_table_endpoint(request: TimeTableRequest):
     """
     Endpoint for generating a parsed json time table
 
