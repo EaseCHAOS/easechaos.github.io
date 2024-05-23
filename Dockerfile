@@ -1,7 +1,6 @@
 FROM python:3.10-slim
 
-ENV PYTHONUNBUFFERED=1  \
-    PORT=80
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
@@ -14,6 +13,6 @@ RUN apt-get update \
 
 COPY . /app/
 
-EXPOSE $PORT
+EXPOSE 80
 
-CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port $PORT"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]

@@ -36,6 +36,7 @@ class TimeTableRequest(BaseModel):
     filename: str
     class_pattern: str
 
+
 def get_json_table(request: TimeTableRequest):
     """
     A function to get the time table in JSON format.
@@ -60,6 +61,7 @@ def get_json_table(request: TimeTableRequest):
 
     return json.loads(table)
 
+
 @router.post("/get_time_table")
 async def get_time_table(request: TimeTableRequest):
     """
@@ -69,9 +71,9 @@ async def get_time_table(request: TimeTableRequest):
     - request (TimeTableRequest): The request object containing the `filename` and `class_pattern`.
 
     Returns:
-    - JSON: Parsed data from the `get_json_table` function that contains the time table cutting across days and time slots. 
+    - JSON: Parsed data from the `get_json_table` function that contains the time table cutting across days and time slots.
         It covers merged durations of lectures exceeding one hour as well.
-    """    
+    """
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
     json_data = get_json_table(request)
@@ -87,7 +89,11 @@ async def get_time_table(request: TimeTableRequest):
             else:
                 start = "-".join(time_parts[:-1])
                 end = time_parts[-1]
-            if current_slot and current_slot["value"] == value and current_slot["end"] == start:
+            if (
+                current_slot
+                and current_slot["value"] == value
+                and current_slot["end"] == start
+            ):
                 current_slot["end"] = end
             else:
                 if current_slot:
@@ -112,12 +118,12 @@ async def download_time_table_endpoint(request: TimeTableRequest):
     - FileResponse: The Excel file containing the time table.
 
     Description:
-    This function is an endpoint for downloading a time table as an Excel file. 
+    This function is an endpoint for downloading a time table as an Excel file.
     It takes a `TimeTableRequest` object as a parameter, which contains the filename and class pattern.
     The function first checks if the time table is already cached. If it is, it retrieves the cached table.
     Otherwise, it generates the time table by calling the `get_time_table` function and adds it to the cache.
     The function then converts the time table into a Pandas DataFrame and creates an Excel file using the `openpyxl` library.
-    It iterates over the columns and rows of the DataFrame and writes the values to the Excel worksheet. 
+    It iterates over the columns and rows of the DataFrame and writes the values to the Excel worksheet.
     Finally, it saves the Excel file to a buffer and returns it as a `FileResponse` object with the appropriate media type.
 
     Note:
