@@ -48,7 +48,7 @@ def get_json_table(request: TimeTableRequest):
     """
     filename = os.path.join(DRAFTS_FOLDER, request.filename)
 
-    table = get_table_from_cache(request.class_pattern, request.filename)
+    table = get_table_from_cache(request.filename, request.class_pattern)
 
     if table is None:
         table = get_time_table(filename, request.class_pattern).to_json(
@@ -65,11 +65,11 @@ async def get_time_table(request: TimeTableRequest):
     """
     Endpoint for generating a parsed json time table
 
-    Args:
-        request (TimeTableRequest): The request object containing the filename and class pattern.
+    Parameters:
+    - request (TimeTableRequest): The request object containing the `filename` and `class_pattern`.
 
     Returns:
-        JSON: Parsed data from the get_json_table function that contains the time table cutting across days and time slots. 
+    - JSON: Parsed data from the `get_json_table` function that contains the time table cutting across days and time slots. 
         It covers merged durations of lectures exceeding one hour as well.
     """    
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
