@@ -3,7 +3,7 @@ import pandas as pd
 from icalendar import Event, Calendar
 from datetime import datetime, timedelta
 import json
-
+import pytz
 import openpyxl
 
 
@@ -149,6 +149,18 @@ def get_time_table(filename: str, class_pattern: str) -> pd.DataFrame:
     return final_df
 
 
+def convert_to_datetime(obj):
+    if isinstance(obj, datetime):
+        return obj
+    elif isinstance(obj, datetime.date):
+        return datetime(obj.year, obj.month, obj.day)
+    elif isinstance(obj, int):
+        # Example conversion: if obj is a timestamp
+        return datetime.fromtimestamp(obj)
+    else:
+        raise TypeError("Unsupported type for datetime conversion")
+
+
 def generate_calendar(timetable, start_date, end_date):
     """
     Generate a calendar of class events based on a given timetable within a specified date range.
@@ -210,151 +222,4 @@ def generate_calendar(timetable, start_date, end_date):
 
     with open("class_schedule.ics", "wb") as f:
         f.write(cal.to_ical())
-
-
-if __name__ == "__main__":
-    data = [
-        {
-            "day": "Monday",
-            "data": [
-                {
-                    "start": "7:00",
-                    "end": "9:00",
-                    "value": "CE 3A 365 (P) KRAMPAH (SF 1)\nCE 3A 3B 379 ABDEL-FATAO (VLE)",
-                },
-                {
-                    "start": "9:00",
-                    "end": "11:00",
-                    "value": "CE 3A, CE 3B 363 BUABENG (Mini Auditorium)",
-                },
-                {
-                    "start": "11:00",
-                    "end": "1:00",
-                    "value": "CE 3B 377 (P) UMARU (SF 1)",
-                },
-                {"start": "", "end": "None", "value": None},
-                {
-                    "start": "1:30",
-                    "end": "3:30",
-                    "value": "CE 3A 367 (P) ABDEL-FATAO (SF 2)",
-                },
-                {
-                    "start": "3:30",
-                    "end": "5:30",
-                    "value": "CE 3B 365 (P) KRAMPAH (FI A3)",
-                },
-                {
-                    "start": "5:30",
-                    "end": "7:30",
-                    "value": "CE 3B 367 ABDEL-FATAO (FI A1)",
-                },
-            ],
-        },
-        {
-            "day": "Tuesday",
-            "data": [
-                {"start": "7:00", "end": "9:00", "value": "CE 3A 377 UMARU (LH 1)"},
-                {
-                    "start": "9:00",
-                    "end": "11:00",
-                    "value": "CE 3B, CE 3A, RN 361 BUABENG (Mini Auditorium)",
-                },
-                {"start": "11:00", "end": "1:00", "value": None},
-                {"start": "", "end": "None", "value": None},
-                {
-                    "start": "1:30",
-                    "end": "3:30",
-                    "value": "CE 3A 381 (P) EFFAH (FI A2)",
-                },
-                {
-                    "start": "3:30",
-                    "end": "5:30",
-                    "value": "CE 3B 381 EFFAH (Comp Eng Lab)",
-                },
-                {"start": "5:30", "end": "7:30", "value": None},
-            ],
-        },
-        {
-            "day": "Wednesday",
-            "data": [
-                {
-                    "start": "7:00",
-                    "end": "9:00",
-                    "value": "CE 3A 367 ABDEL-FATAO (GF 2)",
-                },
-                {
-                    "start": "9:00",
-                    "end": "11:00",
-                    "value": "CE 3A, CE 3B 375 (P) NOFONG (Mini Auditorium)",
-                },
-                {"start": "11:00", "end": "1:00", "value": None},
-                {"start": "", "end": "None", "value": None},
-                {
-                    "start": "1:30",
-                    "end": "3:30",
-                    "value": "CE 3A 377 (P) UMARU (Comp Eng Lab)",
-                },
-                {"start": "3:30", "end": "4:30", "value": None},
-                {
-                    "start": "4:30",
-                    "end": "5:30",
-                    "value": "CE 3A 379 (P) ABDEL-FATAO (Mini Auditorium)",
-                },
-                {"start": "5:30", "end": "7:30", "value": "CE 3B 381 (P) EFFAH (LH 2)"},
-            ],
-        },
-        {
-            "day": "Thursday",
-            "data": [
-                {"start": "7:00", "end": "9:00", "value": None},
-                {
-                    "start": "9:00",
-                    "end": "10:00",
-                    "value": "EL 3A, CE 3B, CE 3A, EL 3B, MC 3B, MC 3A 365 KRAMPAH (VLE)",
-                },
-                {"start": "10:00", "end": "11:00", "value": None},
-                {
-                    "start": "11:00",
-                    "end": "1:00",
-                    "value": "CE 3B, CE 3A 375 NOFONG (Mini Auditorium)",
-                },
-                {"start": "", "end": "None", "value": None},
-                {"start": "1:30", "end": "3:30", "value": None},
-                {
-                    "start": "3:30",
-                    "end": "5:30",
-                    "value": "CE 3A, CE 3B 373 (P) NOFONG (Mini Auditorium)",
-                },
-                {"start": "5:30", "end": "7:30", "value": None},
-            ],
-        },
-        {
-            "day": "Friday",
-            "data": [
-                {
-                    "start": "7:00",
-                    "end": "9:00",
-                    "value": "CE 3A 381 EFFAH (Comp Eng Lab)",
-                },
-                {"start": "9:00", "end": "1:00", "value": None},
-                {"start": "", "end": "None", "value": None},
-                {
-                    "start": "1:30",
-                    "end": "3:30",
-                    "value": "CE 3B, CE 3A 373 NOFONG (Mini Auditorium)",
-                },
-                {
-                    "start": "3:30",
-                    "end": "4:30",
-                    "value": "CE 3B 377 UMARU (SOFTWARE LAB)",
-                },
-                {
-                    "start": "4:30",
-                    "end": "5:30",
-                    "value": "CE 3B 377 UMARU (SOFTWARE LAB)\nMC EL CE 363 (P) BUABENG (VLE)",
-                },
-                {"start": "5:30", "end": "7:30", "value": None},
-            ],
-        },
-    ]
-    generate_calendar(data, "2002-01-01", "2002-01-31")
+    return cal.to_ical()

@@ -3,12 +3,13 @@ import os
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from extract.extract_table import get_time_table
+from extract.extract_table import get_time_table, generate_calendar
 import json
 from pathlib import Path
 import pandas as pd
 from openpyxl import Workbook
 from io import BytesIO
+from fastapi.responses import StreamingResponse
 
 from api.config.redis_config import (
     get_table_from_cache,
@@ -165,3 +166,43 @@ async def download_time_table_endpoint(request: TimeTableRequest):
             excel_content,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
+
+
+@router.post("/calendar_file")
+async def calendar_file_endpoint(request: TimeTableRequest):
+    """
+    Endpoint for generating a calendar file.
+
+    Args:
+        request (TimeTableRequest): The request object containing the `filename` and `class_pattern`.
+
+    Returns:
+        StreamingResponse: A streaming response containing the calendar file. The file is downloaded with the name "class_schedule.ics".
+
+    Description:
+        This function is an endpoint for generating a calendar file. It takes a `TimeTableRequest`
+        object as a parameter, which contains the `filename` and `class_pattern`.
+        The function first calls the `get_time_table_endpoint` function to get the time table.
+        It then generates a calendar file using the `generate_calendar`
+        function with the provided time table, start date, and end date.
+        The generated calendar file is stored in a `BytesIO` object.
+        The function sets the file pointer to the beginning of the file and creates a streaming response with the calendar file.
+        The response is set to have the media type "text/calendar".
+        The function sets the "Content-Disposition" header of the response to "attachment;
+        filename=class_schedule.ics" to indicate that the file should be downloaded.
+        Finally, the function returns the streaming response.
+    """
+
+    timetable = await get_time_table_endpoint(request)
+    start_date = "2023-01-01"
+    end_date = "2023-02-01"
+    cal = generate_calendar(
+        timetable=timetable, start_date=start_date, end_date=end_date
+    )
+    cal_file = BytesIO(cal)
+    cal_file.seek(0)
+
+    # Return as a downloadable file response
+    response = StreamingResponse(cal_file, media_type="text/calendar")
+    response.headers["Content-Disposition"] = "attachment; filename=class_schedule.ics"
+    return response
