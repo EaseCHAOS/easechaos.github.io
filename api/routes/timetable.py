@@ -37,6 +37,7 @@ class TimeTableRequest(BaseModel):
     filename: str
     class_pattern: str
 
+
 def get_json_table(request: TimeTableRequest):
     """
     A function to get the time table in JSON format.
@@ -52,14 +53,13 @@ def get_json_table(request: TimeTableRequest):
     # table = get_table_from_cache(request.filename, request.class_pattern)
 
     # if table is None:
-    table = get_time_table(filename, request.class_pattern).to_json(
-            orient="records"
-        )
-        # add_table_to_cache(
-        #     table=table, class_pattern=request.class_pattern, filename=request.filename
-        # )
+    table = get_time_table(filename, request.class_pattern).to_json(orient="records")
+    # add_table_to_cache(
+    #     table=table, class_pattern=request.class_pattern, filename=request.filename
+    # )
 
     return json.loads(table)
+
 
 @router.post("/get_time_table")
 async def get_time_table_endpoint(request: TimeTableRequest):
@@ -70,9 +70,9 @@ async def get_time_table_endpoint(request: TimeTableRequest):
     - request (TimeTableRequest): The request object containing the `filename` and `class_pattern`.
 
     Returns:
-    - JSON: Parsed data from the `get_json_table` function that contains the time table cutting across days and time slots. 
+    - JSON: Parsed data from the `get_json_table` function that contains the time table cutting across days and time slots.
         It covers merged durations of lectures exceeding one hour as well.
-    """    
+    """
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
     json_data = get_json_table(request)
@@ -88,7 +88,11 @@ async def get_time_table_endpoint(request: TimeTableRequest):
             else:
                 start = "-".join(time_parts[:-1])
                 end = time_parts[-1]
-            if current_slot and current_slot["value"] == value and current_slot["end"] == start:
+            if (
+                current_slot
+                and current_slot["value"] == value
+                and current_slot["end"] == start
+            ):
                 current_slot["end"] = end
             else:
                 if current_slot:
@@ -113,12 +117,12 @@ async def download_time_table_endpoint(request: TimeTableRequest):
     - FileResponse: The Excel file containing the time table.
 
     Description:
-    This function is an endpoint for downloading a time table as an Excel file. 
+    This function is an endpoint for downloading a time table as an Excel file.
     It takes a `TimeTableRequest` object as a parameter, which contains the filename and class pattern.
     The function first checks if the time table is already cached. If it is, it retrieves the cached table.
     Otherwise, it generates the time table by calling the `get_time_table` function and adds it to the cache.
     The function then converts the time table into a Pandas DataFrame and creates an Excel file using the `openpyxl` library.
-    It iterates over the columns and rows of the DataFrame and writes the values to the Excel worksheet. 
+    It iterates over the columns and rows of the DataFrame and writes the values to the Excel worksheet.
     Finally, it saves the Excel file to a buffer and returns it as a `FileResponse` object with the appropriate media type.
 
     Note:
@@ -164,13 +168,38 @@ async def download_time_table_endpoint(request: TimeTableRequest):
 
 @router.post("/calendar_file")
 async def calendar_file_endpoint(request: TimeTableRequest):
+    """
+    Endpoint for generating a calendar file.
+
+    Args:
+        request (TimeTableRequest): The request object containing the `filename` and `class_pattern`.
+
+    Returns:
+        StreamingResponse: A streaming response containing the calendar file. The file is downloaded with the name "class_schedule.ics".
+
+    Description:
+        This function is an endpoint for generating a calendar file. It takes a `TimeTableRequest`
+        object as a parameter, which contains the `filename` and `class_pattern`.
+        The function first calls the `get_time_table_endpoint` function to get the time table.
+        It then generates a calendar file using the `generate_calendar`
+        function with the provided time table, start date, and end date.
+        The generated calendar file is stored in a `BytesIO` object.
+        The function sets the file pointer to the beginning of the file and creates a streaming response with the calendar file.
+        The response is set to have the media type "text/calendar".
+        The function sets the "Content-Disposition" header of the response to "attachment;
+        filename=class_schedule.ics" to indicate that the file should be downloaded.
+        Finally, the function returns the streaming response.
+    """
+
     timetable = await get_time_table_endpoint(request)
     start_date = "2023-01-01"
     end_date = "2023-02-01"
-    cal = generate_calendar(timetable=timetable, start_date=start_date, end_date=end_date)
+    cal = generate_calendar(
+        timetable=timetable, start_date=start_date, end_date=end_date
+    )
     cal_file = BytesIO(cal)
     cal_file.seek(0)
-    
+
     # Return as a downloadable file response
     response = StreamingResponse(cal_file, media_type="text/calendar")
     response.headers["Content-Disposition"] = "attachment; filename=class_schedule.ics"
