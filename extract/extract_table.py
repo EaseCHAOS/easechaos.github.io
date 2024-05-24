@@ -201,10 +201,8 @@ def generate_calendar(timetable, start_date, end_date):
                         and class_info["end"]
                         and class_info["value"]
                     ):
-                        # Parse start and end times in 24-hour format
                         start_time = datetime.strptime(class_info["start"], "%H:%M")
                         end_time = datetime.strptime(class_info["end"], "%H:%M")
-
                         event = Event()
                         event.add("summary", class_info["value"].replace("\n", " "))
                         event.add(
@@ -224,4 +222,4 @@ def generate_calendar(timetable, start_date, end_date):
 
     with open("class_schedule.ics", "wb") as f:
         f.write(cal.to_ical())
-        return cal.to_ical()
+    return cal.to_ical()

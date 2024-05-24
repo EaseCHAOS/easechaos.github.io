@@ -170,9 +170,8 @@ async def calendar_file_endpoint(request: TimeTableRequest):
     end_date = "2023-02-01"
     cal = generate_calendar(timetable=timetable, start_date=start_date, end_date=end_date)
     print(cal)
-    cal_file = BytesIO()
-    with cal_file:
-        cal_file.write(cal)
+    cal_file = BytesIO(cal)
+    cal_file.seek(0)
     
     # Return as a downloadable file response
     response = StreamingResponse(cal_file, media_type="text/calendar")
