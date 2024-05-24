@@ -165,11 +165,9 @@ async def download_time_table_endpoint(request: TimeTableRequest):
 @router.post("/calendar_file")
 async def calendar_file_endpoint(request: TimeTableRequest):
     timetable = await get_time_table_endpoint(request)
-    print(timetable)
     start_date = "2023-01-01"
     end_date = "2023-02-01"
     cal = generate_calendar(timetable=timetable, start_date=start_date, end_date=end_date)
-    print(cal)
     cal_file = BytesIO(cal)
     cal_file.seek(0)
     
