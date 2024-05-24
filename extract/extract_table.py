@@ -101,7 +101,7 @@ def _get_all_daily_tables(filename: str, class_pattern: str) -> dict:
     return dfs
 
 
-def get_time_table2(filename: str, class_pattern: str) -> pd.DataFrame:
+def get_time_table(filename: str, class_pattern: str) -> pd.DataFrame:
     """
     Get the complete time table for a particular class for all days.
 

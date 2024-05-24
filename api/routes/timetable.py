@@ -3,7 +3,7 @@ import os
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from extract.extract_table import get_time_table2, generate_calendar
+from extract.extract_table import get_time_table, generate_calendar
 import json
 from pathlib import Path
 import pandas as pd
@@ -52,7 +52,7 @@ def get_json_table(request: TimeTableRequest):
     # table = get_table_from_cache(request.filename, request.class_pattern)
 
     # if table is None:
-    table = get_time_table2(filename, request.class_pattern).to_json(
+    table = get_time_table(filename, request.class_pattern).to_json(
             orient="records"
         )
         # add_table_to_cache(
@@ -62,7 +62,7 @@ def get_json_table(request: TimeTableRequest):
     return json.loads(table)
 
 @router.post("/get_time_table")
-async def get_time_table(request: TimeTableRequest):
+async def get_time_table_endpoint(request: TimeTableRequest):
     """
     Endpoint for generating a parsed json time table
 
@@ -164,7 +164,7 @@ async def download_time_table_endpoint(request: TimeTableRequest):
 
 @router.post("/calendar_file")
 async def calendar_file_endpoint(request: TimeTableRequest):
-    timetable = await get_time_table(request)
+    timetable = await get_time_table_endpoint(request)
     print(timetable)
     start_date = "2023-01-01"
     end_date = "2023-02-01"
