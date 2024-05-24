@@ -3,12 +3,13 @@ import os
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from extract.extract_table import get_time_table
+from extract.extract_table import get_time_table2, generate_calendar
 import json
 from pathlib import Path
 import pandas as pd
 from openpyxl import Workbook
 from io import BytesIO
+from fastapi.responses import StreamingResponse
 
 from api.config.redis_config import (
     get_table_from_cache,
@@ -48,15 +49,15 @@ def get_json_table(request: TimeTableRequest):
     """
     filename = os.path.join(DRAFTS_FOLDER, request.filename)
 
-    table = get_table_from_cache(request.filename, request.class_pattern)
+    # table = get_table_from_cache(request.filename, request.class_pattern)
 
-    if table is None:
-        table = get_time_table(filename, request.class_pattern).to_json(
+    # if table is None:
+    table = get_time_table2(filename, request.class_pattern).to_json(
             orient="records"
         )
-        add_table_to_cache(
-            table=table, class_pattern=request.class_pattern, filename=request.filename
-        )
+        # add_table_to_cache(
+        #     table=table, class_pattern=request.class_pattern, filename=request.filename
+        # )
 
     return json.loads(table)
 
@@ -159,3 +160,21 @@ async def download_time_table_endpoint(request: TimeTableRequest):
             excel_content,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
+
+
+@router.post("/calendar_file")
+async def calendar_file_endpoint(request: TimeTableRequest):
+    timetable = await get_time_table(request)
+    print(timetable)
+    start_date = "2023-01-01"
+    end_date = "2023-02-01"
+    cal = generate_calendar(timetable=timetable, start_date=start_date, end_date=end_date)
+    print(cal)
+    cal_file = BytesIO()
+    with cal_file:
+        cal_file.write(cal)
+    
+    # Return as a downloadable file response
+    response = StreamingResponse(cal_file, media_type="text/calendar")
+    response.headers["Content-Disposition"] = "attachment; filename=class_schedule.ics"
+    return response
