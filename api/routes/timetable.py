@@ -50,13 +50,15 @@ def get_json_table(request: TimeTableRequest):
     """
     filename = os.path.join(DRAFTS_FOLDER, request.filename)
 
-    # table = get_table_from_cache(request.filename, request.class_pattern)
+    table = get_table_from_cache(request.filename, request.class_pattern)
 
-    # if table is None:
-    table = get_time_table(filename, request.class_pattern).to_json(orient="records")
-    # add_table_to_cache(
-    #     table=table, class_pattern=request.class_pattern, filename=request.filename
-    # )
+    if table is None:
+        table = get_time_table(filename, request.class_pattern).to_json(
+            orient="records"
+        )
+        add_table_to_cache(
+            table=table, class_pattern=request.class_pattern, filename=request.filename
+        )
 
     return json.loads(table)
 
